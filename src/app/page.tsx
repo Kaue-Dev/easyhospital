@@ -1,101 +1,122 @@
-import Image from "next/image";
+"use client"
+
+import { useEffect, useState } from "react";
+import { Sidebar } from "./components/Sidebar";
+import { getConsultas } from "./api/getConsultas";
+import { IConsulta } from "./interfaces/IConsulta";
+import { getPacientes } from "./api/getPacientes";
+import { IPaciente } from "./interfaces/IPaciente";
+import { TableHead } from "./components/TableHead";
+import { TableHeadCell } from "./components/TableHeadCell";
+import { TableBodyCell } from "./components/TableBodyCell";
+import { URL } from "./api/URL";
+import { IMedico } from "./interfaces/IMedico";
+import { getMedicos } from "./api/getMedicos";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const [consultas, setConsultas] = useState<IConsulta[]>([]);
+  const [pacientes, setPacientes] = useState<IPaciente[]>([]);
+  const [medicos, setMedicos] = useState<IMedico[]>([]);
+
+  useEffect(() => {
+    getConsultas(`${URL}/consultas`).then(data => setConsultas(data))
+    getPacientes(`${URL}/pacientes`).then(data => setPacientes(data))
+    getMedicos(`${URL}/medicos`).then(data => setMedicos(data))
+  }, [])
+
+  return (
+    <div className="flex bg-blue-950">
+      <Sidebar />
+      <div className="w-full p-8 flex flex-col gap-8">
+        <div>
+          <h1 className="text-center text-2xl font-bold mb-4 text-white">Listagem de Consultas</h1>
+          <div className="flex flex-col gap-4">
+            <table className="table-auto w-full bg-white">
+              <TableHead>
+                <tr>
+                  <TableHeadCell>ID</TableHeadCell>
+                  <TableHeadCell>Paciente_ID</TableHeadCell>
+                  <TableHeadCell>Médico_ID</TableHeadCell>
+                  <TableHeadCell>Data e Hora</TableHeadCell>
+                  <TableHeadCell>Descrição</TableHeadCell>
+                </tr>
+              </TableHead>
+              <tbody>
+                {consultas.map(consulta => (
+                  <tr key={consulta.id}>
+                    <TableBodyCell>{consulta.id}</TableBodyCell>
+                    <TableBodyCell>{consulta.paciente_id}</TableBodyCell>
+                    <TableBodyCell>{consulta.medico_id}</TableBodyCell>
+                    <TableBodyCell>{consulta.data_hora}</TableBodyCell>
+                    <TableBodyCell>{consulta.descricao}</TableBodyCell>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        <div>
+          <h1 className="text-center text-2xl font-bold mb-4 text-white">Listagem de Pacientes</h1>
+          <div className="flex flex-col gap-4">
+            <table className="table-auto w-full bg-white">
+              <TableHead>
+                <tr>
+                  <TableHeadCell>ID</TableHeadCell>
+                  <TableHeadCell>CPF</TableHeadCell>
+                  <TableHeadCell>Nome</TableHeadCell>
+                  <TableHeadCell>Telefone</TableHeadCell>
+                  <TableHeadCell>Celular</TableHeadCell>
+                  <TableHeadCell>Convênio_ID</TableHeadCell>
+                </tr>
+              </TableHead>
+              <tbody>
+                {pacientes.map(paciente => (
+                  <tr key={paciente.id}>
+                    <TableBodyCell>{paciente.id}</TableBodyCell>
+                    <TableBodyCell>{paciente.cpf}</TableBodyCell>
+                    <TableBodyCell>{paciente.nome}</TableBodyCell>
+                    <TableBodyCell>{paciente.telefone}</TableBodyCell>
+                    <TableBodyCell>{paciente.celular}</TableBodyCell>
+                    <TableBodyCell>{paciente.convenio_id}</TableBodyCell>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <h1 className="text-center text-2xl font-bold mb-4 text-white">Listagem de Médicos</h1>
+          <div className="flex flex-col gap-4">
+          <table className="table-auto w-full bg-white">
+            <TableHead>
+              <tr>
+                <TableHeadCell>ID</TableHeadCell>
+                <TableHeadCell>Nome</TableHeadCell>
+                <TableHeadCell>CRM</TableHeadCell>
+                <TableHeadCell>Telefone</TableHeadCell>
+                <TableHeadCell>Celular</TableHeadCell>
+                <TableHeadCell>Especialidade_ID</TableHeadCell>
+                <TableHeadCell>Sexo</TableHeadCell>
+              </tr>
+            </TableHead>
+            <tbody>
+              {medicos.map(medico => (
+                <tr key={medico.id}>
+                  <TableBodyCell>{medico.id}</TableBodyCell>
+                  <TableBodyCell>{medico.nome}</TableBodyCell>
+                  <TableBodyCell>{medico.crm}</TableBodyCell>
+                  <TableBodyCell>{medico.telefone}</TableBodyCell>
+                  <TableBodyCell>{medico.celular}</TableBodyCell>
+                  <TableBodyCell>{medico.especialidade_id}</TableBodyCell>
+                  <TableBodyCell>{medico.sexo}</TableBodyCell>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
