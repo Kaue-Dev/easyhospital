@@ -12,8 +12,16 @@ import { TableBodyCell } from "./components/TableBodyCell";
 import { URL } from "./api/URL";
 import { IMedico } from "./interfaces/IMedico";
 import { getMedicos } from "./api/getMedicos";
+import { CalendarClock, Trash2 } from "lucide-react";
+import { Deletar } from "./api/Deletar";
+import { FormField } from "./pages/components/FormField";
+import { Update } from "./api/Update";
 
 export default function Home() {
+
+  const [novaDataHora, setNovaDataHora] = useState<string>("");
+  const [consultaId, setConsultaId] = useState<number>(0);
+  const [showModal, setShowModal] = useState<boolean>(false);
 
   const [consultas, setConsultas] = useState<IConsulta[]>([]);
   const [pacientes, setPacientes] = useState<IPaciente[]>([]);
@@ -24,6 +32,33 @@ export default function Home() {
     getPacientes(`${URL}/pacientes`).then(data => setPacientes(data))
     getMedicos(`${URL}/medicos`).then(data => setMedicos(data))
   }, [])
+
+  function handleDeleteConsulta(id: number) {
+    Deletar(`${URL}/consultas/${id}`).then(() => {
+      setConsultas(consultas.filter(consulta => consulta.id !== id))
+    })
+  }
+
+  function handleDeletePaciente(id: number) {
+    Deletar(`${URL}/pacientes/${id}`).then(() => {
+      setPacientes(pacientes.filter(paciente => paciente.id !== id))
+    })
+  }
+
+  function handleDeleteMedico(id: number) {
+    Deletar(`${URL}/medicos/${id}`).then(() => {
+      setMedicos(medicos.filter(medico => medico.id !== id))
+    })
+  }
+
+  function handleUpdateConsulta() {
+    if (!consultaId || !novaDataHora) return
+    setShowModal(false)
+    setNovaDataHora("")
+    Update(`${URL}/consultas/${consultaId}`, novaDataHora ).then(() => {
+      getConsultas(`${URL}/consultas`).then(data => setConsultas(data))
+    })
+  }
 
   return (
     <div className="flex bg-blue-950">
@@ -40,6 +75,7 @@ export default function Home() {
                   <TableHeadCell>Médico_ID</TableHeadCell>
                   <TableHeadCell>Data e Hora</TableHeadCell>
                   <TableHeadCell>Descrição</TableHeadCell>
+                  <TableHeadCell>Ações</TableHeadCell>
                 </tr>
               </TableHead>
               <tbody>
@@ -50,6 +86,15 @@ export default function Home() {
                     <TableBodyCell>{consulta.medico_id}</TableBodyCell>
                     <TableBodyCell>{consulta.data_hora}</TableBodyCell>
                     <TableBodyCell>{consulta.descricao}</TableBodyCell>
+                    <TableBodyCell>
+                      <div className="flex items-center justify-center gap-4">
+                        <Trash2 className="text-red-600 cursor-pointer" onClick={() => handleDeleteConsulta(consulta.id)} />
+                        <CalendarClock className="text-yellow-600 cursor-pointer" onClick={() => {
+                          setConsultaId(consulta.id)
+                          setShowModal(true)
+                        }} />
+                      </div>
+                    </TableBodyCell>
                   </tr>
                 ))}
               </tbody>
@@ -68,6 +113,7 @@ export default function Home() {
                   <TableHeadCell>Telefone</TableHeadCell>
                   <TableHeadCell>Celular</TableHeadCell>
                   <TableHeadCell>Convênio_ID</TableHeadCell>
+                  <TableHeadCell>Ações</TableHeadCell>
                 </tr>
               </TableHead>
               <tbody>
@@ -79,6 +125,7 @@ export default function Home() {
                     <TableBodyCell>{paciente.telefone}</TableBodyCell>
                     <TableBodyCell>{paciente.celular}</TableBodyCell>
                     <TableBodyCell>{paciente.convenio_id}</TableBodyCell>
+                    <TableBodyCell><Trash2 className="text-red-600 mx-auto cursor-pointer" onClick={() => handleDeletePaciente(paciente.id)} /></TableBodyCell>
                   </tr>
                 ))}
               </tbody>
@@ -98,6 +145,7 @@ export default function Home() {
                 <TableHeadCell>Celular</TableHeadCell>
                 <TableHeadCell>Especialidade_ID</TableHeadCell>
                 <TableHeadCell>Sexo</TableHeadCell>
+                <TableHeadCell>Ações</TableHeadCell>
               </tr>
             </TableHead>
             <tbody>
@@ -110,6 +158,7 @@ export default function Home() {
                   <TableBodyCell>{medico.celular}</TableBodyCell>
                   <TableBodyCell>{medico.especialidade_id}</TableBodyCell>
                   <TableBodyCell>{medico.sexo}</TableBodyCell>
+                  <TableBodyCell><Trash2 className="text-red-600 mx-auto cursor-pointer" onClick={() => handleDeleteMedico(medico.id)} /></TableBodyCell>
                 </tr>
               ))}
             </tbody>
@@ -117,6 +166,14 @@ export default function Home() {
           </div>
         </div>
       </div>
+      {showModal && (
+        <div className="absolute bg-black/50 w-full min-h-screen flex items-center justify-center">
+          <div className="bg-white px-8 py-4 shadow-lg rounded-lg flex flex-col items-center gap-4">
+            <FormField label="Informe a nova Data/Hora" type="datetime-local" value={novaDataHora} onChange={(ev) => setNovaDataHora((ev.target as HTMLInputElement).value)} />
+            <button className="bg-blue-950 text-white w-40 py-2 rounded-lg" onClick={handleUpdateConsulta}>Confirmar</button>
+          </div>
+      </div>
+      )}
     </div>
   );
 }
